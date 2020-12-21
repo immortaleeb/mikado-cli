@@ -3,7 +3,7 @@
 import sys
 import argparse
 
-from mikado.cli.commands import InitCommand, ListCommand, AddCommand, CurrentCommand, SelectCommand, TreeCommand, RmCommand
+from mikado.cli.commands import *
 from mikado.graph.project import DEFAULT_MIKADO_DIR
 
 COMMANDS = {
@@ -14,6 +14,7 @@ COMMANDS = {
     'select': SelectCommand(),
     'tree': TreeCommand(),
     'rm': RmCommand(),
+    'set': SetCommand(),
 }
 
 def build_argparser():

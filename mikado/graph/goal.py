@@ -19,6 +19,7 @@ def load_goal(*, mikado_dir, goal_ref):
 
     goal_data = {
         'id': goal_ref,
+        'status': Goal.NEW,
         'parent_refs': [],
         'children_refs': [],
         'mikado_dir': mikado_dir,
@@ -37,6 +38,8 @@ def load_goal(*, mikado_dir, goal_ref):
                 elif line.startswith('parent:'):
                     parent_ref = line.replace('parent:', '').strip()
                     goal_data['parent_refs'].append(parent_ref)
+                elif line.startswith('status:'):
+                    goal_data['status'] = line.replace('status:', '').strip()
 
     goal = Goal(**goal_data)
     loaded_goals[goal_ref] = goal
@@ -63,23 +66,24 @@ def link_child(*, mikado_dir, parent_ref, child_ref):
 
 def unlink_child(*, mikado_dir, parent_ref, child_ref):
     parent_file = os.path.join(mikado_dir, 'objects', parent_ref)
-
-    with open(parent_file, 'r') as f:
-        parent_lines = f.readlines()
-
-    with open(parent_file, 'w') as f:
-        for line in parent_lines:
-            if line.strip() != 'child: ' + child_ref:
-                f.write(line)
+    _remove_line(parent_file, lambda line: line.strip() == 'child: ' + child_ref)
 
     child_file = os.path.join(mikado_dir, 'objects', child_ref)
+    _remove_line(child_file, lambda line: line.strip() == 'parent: ' + parent_ref)
 
-    with open(child_file, 'r') as f:
-        child_lines = f.readlines()
+def _remove_line(goal_file, match_func):
+    _replace_line(goal_file, match_func, None)
 
-    with open(child_file, 'w') as f:
-        for line in child_lines:
-            if line.strip() != 'parent: ' + parent_ref:
+def _replace_line(goal_file, match_func, replacement):
+    with open(goal_file, 'r') as f:
+        lines = f.readlines()
+
+    with open(goal_file, 'w') as f:
+        for line in lines:
+            if match_func(line):
+                if replacement:
+                    f.write(replacement + '\n')
+            else:
                 f.write(line)
 
 def create_goal(*, mikado_dir, title, description, parent_ref=None):
@@ -90,6 +94,7 @@ def create_goal(*, mikado_dir, title, description, parent_ref=None):
     with open(goal_file, 'w+') as f:
         f.write("title: %s\n" % title)
         f.write("description: %s\n" % (description or ''))
+        f.write("status: %s\n" % Goal.NEW)
 
     if parent_ref:
         link_child(mikado_dir=mikado_dir, parent_ref=parent_ref, child_ref=id)
@@ -128,14 +133,26 @@ def is_offspring(*, mikado_dir, parent_ref, child_ref):
 
     return False
 
+def set_status(*, mikado_dir, goal_ref, new_status):
+   goal_file = os.path.join(mikado_dir, 'objects', goal_ref)
+
+   _replace_line(goal_file, lambda line: line.startswith('status:'), 'status: ' + new_status)
+
 class Goal:
 
-    def __init__(self, *, mikado_dir, id, title, description, parent_refs, children_refs):
+    NEW = 'new'
+    IN_PROGRESS = 'in_progress'
+    DONE = 'done'
+
+    def __init__(self, *, mikado_dir, id, title, description, status, parent_refs, children_refs):
         self.id = id
         self.title = title
         self.description = description
+        self.status = status
+
         self.parent_refs = parent_refs
         self.children_refs = children_refs
+
         self.mikado_dir = mikado_dir
 
     @property
