@@ -44,6 +44,13 @@ def load_goal(*, mikado_dir, goal_ref):
     return goal
 
 def link_child(*, mikado_dir, parent_ref, child_ref):
+    if is_offspring(
+        mikado_dir=mikado_dir,
+        parent_ref=child_ref,
+        child_ref=parent_ref,
+    ):
+        raise Exception("Possible cycle detected, cannot link goals")
+
     parent_file = os.path.join(mikado_dir, 'objects', parent_ref)
 
     with open(parent_file, 'a') as f:
@@ -101,6 +108,25 @@ def delete_goal(*, mikado_dir, goal_ref):
             parent_ref=parent_ref,
             child_ref=goal_ref,
         )
+
+def is_offspring(*, mikado_dir, parent_ref, child_ref):
+    if parent_ref == child_ref:
+        return True
+
+    child = load_goal(
+        mikado_dir=mikado_dir,
+        goal_ref=child_ref,
+    )
+
+    for parent in child.parents:
+        if is_offspring(
+            mikado_dir=mikado_dir,
+            parent_ref=parent_ref,
+            child_ref=parent.id,
+        ):
+            return True
+
+    return False
 
 class Goal:
 
