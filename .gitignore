@@ -1,7 +1,8 @@
-# local python configuration
+# local files
 .python-version
 env/
 .mikado/
+*.swp
 
 # build directories
 dist/

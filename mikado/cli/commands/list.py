@@ -1,8 +1,10 @@
 from mikado.graph.project import load_project
 from mikado.graph.goal import load_goal
 
+from mikado.cli.formatting.goal import format_goal
+
 def print_goal(goal):
-    print("%s - %s" % (goal.id, goal.title))
+    print(format_goal(goal))
 
 class ListCommand:
 

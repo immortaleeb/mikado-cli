@@ -2,7 +2,7 @@
 
 import sys
 
-from mikado.cli.commands import HelpCommand, InitCommand, ListCommand, AddCommand, CurrentCommand, SelectCommand
+from mikado.cli.commands import HelpCommand, InitCommand, ListCommand, AddCommand, CurrentCommand, SelectCommand, TreeCommand
 from mikado.graph.project import DEFAULT_MIKADO_DIR
 
 COMMANDS = {
@@ -11,6 +11,7 @@ COMMANDS = {
     'add':  AddCommand(),
     'current': CurrentCommand(),
     'select': SelectCommand(),
+    'tree': TreeCommand(),
 }
 
 COMMANDS['help'] = HelpCommand(COMMANDS)
