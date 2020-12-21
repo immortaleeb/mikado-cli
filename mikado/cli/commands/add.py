@@ -1,24 +1,26 @@
 import os
+import argparse
 
 from mikado.graph.project import load_project
 from mikado.graph.goal import create_goal
 
-class AddCommand:
+from .base import AbstractCommand
+
+class AddCommand(AbstractCommand):
 
     @property
     def description(self):
         return "Adds a new goal to the current goal"
 
-    def run(self, argv):
-        if len(argv) < 2:
-            print('Missing title argument')
-            return 1
+    def add_arguments(self, parser):
+        parser.add_argument('-t', '--title', required=True)
 
+    def run(self, args):
         project = load_project(self.context.mikado_dir)
 
         goal_ref = create_goal(
             mikado_dir=self.context.mikado_dir,
-            title=argv[1],
+            title=args.title,
             description=None,
             parent_ref=project.current_goal_ref,
         )

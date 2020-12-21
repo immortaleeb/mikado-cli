@@ -2,13 +2,16 @@ import os
 
 from mikado.graph.project import create_project
 
-class InitCommand:
+from .base import AbstractCommand
+
+class InitCommand(AbstractCommand):
     @property
     def description(self):
         return "Initializes a mikado project"
 
-    def run(self, argv):
-        directory = argv[1] if len(argv) > 1 else os.getcwd()
+    def add_arguments(self, parser):
+        parser.add_argument('directory', nargs='?', default=os.getcwd())
 
-        create_project(directory)
+    def run(self, args):
+        create_project(args.directory)
 

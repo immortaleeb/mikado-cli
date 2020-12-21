@@ -1,7 +1,9 @@
 from mikado.graph.goal import load_goal
 
 from mikado.cli.formatting.goal import format_goal
-from mikado.cli.parsing.goal import parse_goal_ref_arg
+from mikado.cli.parsing.goal import parse_goal_ref
+
+from .base import AbstractCommand
 
 def print_goal(goal, depth=0):
     if depth == 0:
@@ -18,14 +20,17 @@ def print_tree(goal, depth=0):
     for child in goal.children:
         print_tree(child, depth+1)
 
-class TreeCommand:
+class TreeCommand(AbstractCommand):
 
     @property
     def description(self):
         return "Prints a tree of the given goal"
 
-    def run(self, argv):
-        goal_ref = parse_goal_ref_arg(argv, 1, self.context.mikado_dir)
+    def add_arguments(self, parser):
+        parser.add_argument('goal', nargs='?', default=None)
+
+    def run(self, args):
+        goal_ref = parse_goal_ref(args.goal, self.context.mikado_dir)
 
         root_goal = load_goal(
             mikado_dir=self.context.mikado_dir,

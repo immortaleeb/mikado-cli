@@ -2,17 +2,18 @@ from mikado.graph.project import set_current_goal
 
 from mikado.cli.parsing.goal import parse_goal_ref
 
-class SelectCommand:
+from .base import AbstractCommand
+
+class SelectCommand(AbstractCommand):
 
     @property
     def description(self):
         return "Sets the current goal"
 
-    def run(self, argv):
-        if len(argv) < 2:
-            print('Missing argument: new goal')
-            return 1
+    def add_arguments(self, parser):
+        parser.add_argument('goal')
 
-        goal_ref = parse_goal_ref(argv[1], self.context.mikado_dir)
+    def run(self, args):
+        goal_ref = parse_goal_ref(args.goal, self.context.mikado_dir)
         set_current_goal(self.context.mikado_dir, goal_ref)
 

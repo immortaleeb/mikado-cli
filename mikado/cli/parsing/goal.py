@@ -1,13 +1,5 @@
-from mikado.graph.goal import goal_exists
 from mikado.graph.project import load_project
-
-def parse_goal_ref_arg(argv, index, mikado_dir):
-    if len(argv) > index:
-        goal_ref = argv[index]
-    else:
-        goal_ref = None
-
-    return parse_goal_ref(goal_ref, mikado_dir)
+from mikado.graph.goal import goal_exists
 
 def parse_goal_ref(raw_ref, mikado_dir):
     if raw_ref is None or raw_ref == 'CURRENT':
