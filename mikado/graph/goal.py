@@ -54,6 +54,27 @@ def link_child(*, mikado_dir, parent_ref, child_ref):
     with open(child_file, 'a') as f:
         f.write('parent: %s\n' % parent_ref)
 
+def unlink_child(*, mikado_dir, parent_ref, child_ref):
+    parent_file = os.path.join(mikado_dir, 'objects', parent_ref)
+
+    with open(parent_file, 'r') as f:
+        parent_lines = f.readlines()
+
+    with open(parent_file, 'w') as f:
+        for line in parent_lines:
+            if line.strip() != 'child: ' + child_ref:
+                f.write(line)
+
+    child_file = os.path.join(mikado_dir, 'objects', child_ref)
+
+    with open(child_file, 'r') as f:
+        child_lines = f.readlines()
+
+    with open(child_file, 'w') as f:
+        for line in child_lines:
+            if line.strip() != 'parent: ' + parent_ref:
+                f.write(line)
+
 def create_goal(*, mikado_dir, title, description, parent_ref=None):
     id = generate_id()
 
