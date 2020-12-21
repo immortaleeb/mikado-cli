@@ -19,6 +19,7 @@ def load_goal(*, mikado_dir, goal_ref):
 
     goal_data = {
         'id': goal_ref,
+        'parent_refs': [],
         'children_refs': [],
         'mikado_dir': mikado_dir,
     }
@@ -26,24 +27,32 @@ def load_goal(*, mikado_dir, goal_ref):
     with open(goal_file, 'r') as f:
         for line in f.readlines():
             if line.strip():
-                if line.startswith('title: '):
+                if line.startswith('title:'):
                     goal_data['title'] = line.replace('title:', '').strip()
-                elif line.startswith('description: '):
+                elif line.startswith('description:'):
                     goal_data['description'] = line.replace('description:', '').strip()
-                elif line.startswith('child: '):
+                elif line.startswith('child:'):
                     child_ref = line.replace('child:', '').strip()
                     goal_data['children_refs'].append(child_ref)
+                elif line.startswith('parent:'):
+                    parent_ref = line.replace('parent:', '').strip()
+                    goal_data['parent_refs'].append(parent_ref)
 
     goal = Goal(**goal_data)
     loaded_goals[goal_ref] = goal
 
     return goal
 
-def add_child(*, mikado_dir, parent_ref, child_ref):
+def link_child(*, mikado_dir, parent_ref, child_ref):
     parent_file = os.path.join(mikado_dir, 'objects', parent_ref)
 
     with open(parent_file, 'a') as f:
         f.write('child: %s\n' % child_ref)
+
+    child_file = os.path.join(mikado_dir, 'objects', child_ref)
+
+    with open(child_file, 'a') as f:
+        f.write('parent: %s\n' % parent_ref)
 
 def create_goal(*, mikado_dir, title, description, parent_ref=None):
     id = generate_id()
@@ -55,18 +64,40 @@ def create_goal(*, mikado_dir, title, description, parent_ref=None):
         f.write("description: %s\n" % (description or ''))
 
     if parent_ref:
-        add_child(mikado_dir=mikado_dir, parent_ref=parent_ref, child_ref=id)
+        link_child(mikado_dir=mikado_dir, parent_ref=parent_ref, child_ref=id)
 
     return id
 
+def delete_goal(*, mikado_dir, goal_ref):
+    goal = load_goal(
+        mikado_dir=mikado_dir,
+        goal_ref=goal_ref,
+    )
+
+    for parent_ref in goal.parent_refs:
+        unlink_child(
+            mikado_dir=mikado_dir,
+            parent_ref=parent_ref,
+            child_ref=goal_ref,
+        )
+
 class Goal:
 
-    def __init__(self, *, mikado_dir, id, title, description, children_refs):
+    def __init__(self, *, mikado_dir, id, title, description, parent_refs, children_refs):
         self.id = id
         self.title = title
         self.description = description
+        self.parent_refs = parent_refs
         self.children_refs = children_refs
         self.mikado_dir = mikado_dir
+
+    @property
+    def parents(self):
+        for parent_ref in self.parent_refs:
+            yield load_goal(
+                mikado_dir=self.mikado_dir,
+                goal_ref=parent_ref,
+            )
 
     @property
     def children(self):
