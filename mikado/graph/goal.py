@@ -13,7 +13,7 @@ def goal_exists(mikado_dir, goal_ref):
 
 def load_goal(*, mikado_dir, goal_ref):
     if goal_ref in loaded_goals:
-        return goal_ref
+        return loaded_goals[goal_ref]
 
     goal_file = os.path.join(mikado_dir, 'objects', goal_ref)
 
