@@ -1,0 +1,8 @@
+# local python configuration
+.python-version
+env/
+
+# build directories
+dist/
+build/
+
