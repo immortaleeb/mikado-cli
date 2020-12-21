@@ -5,20 +5,28 @@ from mikado.cli.parsing.goal import parse_goal_ref
 
 from .base import AbstractCommand
 
-def print_goal(goal, depth=0):
+def print_goal(goal, is_visited, depth=0):
     if depth == 0:
         prefix = '.'
     else:
         prefix = '|--' if len(goal.children_refs) < 1 else '|-+'
 
+        if is_visited:
+            prefix += ' (*)'
+
     whitespace = ' ' * depth * 2
     print(whitespace + prefix + ' ' + format_goal(goal))
 
-def print_tree(goal, depth=0):
-    print_goal(goal, depth)
+def print_tree(goal, visited, depth=0):
+    is_visited = goal.id in visited
 
-    for child in goal.children:
-        print_tree(child, depth+1)
+    print_goal(goal, is_visited, depth)
+
+    if not is_visited:
+        visited.append(goal.id)
+
+        for child in goal.children:
+            print_tree(child, visited, depth+1)
 
 class TreeCommand(AbstractCommand):
 
@@ -37,5 +45,5 @@ class TreeCommand(AbstractCommand):
             goal_ref=goal_ref,
         )
 
-        print_tree(root_goal)
+        print_tree(root_goal, [])
 
