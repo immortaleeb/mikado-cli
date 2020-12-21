@@ -1,6 +1,7 @@
 # local python configuration
 .python-version
 env/
+.mikado/
 
 # build directories
 dist/

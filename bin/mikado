@@ -1,4 +1,39 @@
 #!/usr/bin/env python3
 
-print('hello world')
+import sys
+
+from mikado.cli.commands import HelpCommand, InitCommand, ListCommand, AddCommand, CurrentCommand, SelectCommand
+from mikado.graph.project import DEFAULT_MIKADO_DIR
+
+COMMANDS = {
+    'init': InitCommand(),
+    'list': ListCommand(),
+    'add':  AddCommand(),
+    'current': CurrentCommand(),
+    'select': SelectCommand(),
+}
+
+COMMANDS['help'] = HelpCommand(COMMANDS)
+
+class Context:
+    def __init__(self, *, mikado_dir):
+        self.mikado_dir = mikado_dir
+
+def run_command(argv):
+    if len(argv) > 1:
+        command_name = argv[1]
+
+        if command_name not in COMMANDS:
+            print("Error: unknown command '%s'" % command_name)
+            command_name = 'help'
+    else:
+        command_name = 'help'
+
+    command = COMMANDS[command_name]
+    command.context = Context(mikado_dir=DEFAULT_MIKADO_DIR)
+
+    command.run(argv[1:])
+
+return_code = run_command(sys.argv)
+sys.exit(return_code or 0)
 
