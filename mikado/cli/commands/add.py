@@ -24,10 +24,9 @@ class AddCommand(AbstractCommand):
             print('You should provide either an existing goal or a title for a new goal')
             return 1
 
-        project = load_project(self.context.mikado_dir)
-        parent_ref = parse_goal_ref(args.parent, self.context.mikado_dir) if args.parent else project.current_goal_ref
-
         if args.title:
+            parent_ref = parse_goal_ref(args.goal, self.context.mikado_dir)
+
             goal_ref = create_goal(
                 mikado_dir=self.context.mikado_dir,
                 title=args.title,
@@ -39,6 +38,7 @@ class AddCommand(AbstractCommand):
         elif args.goal:
             project = load_project(self.context.mikado_dir)
 
+            parent_ref = project.current_goal_ref
             goal_ref = parse_goal_ref(args.goal, self.context.mikado_dir)
 
             link_child(
